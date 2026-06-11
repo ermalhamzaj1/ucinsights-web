@@ -2429,23 +2429,39 @@ else document.addEventListener('DOMContentLoaded',boot);
     c.innerHTML=h;
   }
 
-  /* ---- nav button ---- */
+  /* ---- nav button (desktop pill + mobile menu entry) ---- */
   function ensureBtn(){
-    var nr=document.querySelector('.nav-right');if(!nr||document.getElementById('acct-btn'))return;
-    var b=document.createElement('button');b.id='acct-btn';b.className='theme-btn';b.type='button';
-    b.title=L('account');b.setAttribute('aria-label',L('account'));b.innerHTML=PERSON;
-    b.onclick=function(){window.uauth.open();};
-    nr.insertBefore(b,document.getElementById('theme-btn')||nr.firstChild);updateBtn();
+    var nr=document.querySelector('.nav-right');
+    if(nr&&!document.getElementById('acct-btn')){
+      var b=document.createElement('button');b.id='acct-btn';b.type='button';
+      b.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap';
+      b.onclick=function(){window.uauth.open();};
+      nr.insertBefore(b,document.getElementById('theme-btn')||nr.firstChild);
+    }
+    var mm=document.getElementById('mob-menu');
+    if(mm&&!document.getElementById('acct-mob')){
+      var m=document.createElement('button');m.id='acct-mob';m.className='mob-link';m.type='button';
+      m.innerHTML=PERSON+' <span id="acct-mob-tx">'+L('sign_in')+'</span>';
+      m.onclick=function(){window.uauth.open();if(window.closeMob)window.closeMob();};
+      mm.appendChild(m);
+    }
+    updateBtn();
   }
   function updateBtn(){
-    var b=document.getElementById('acct-btn');if(!b)return;
-    if(CURRENT){var e=CURRENT.email||'?';b.innerHTML='<span style="display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:600">'+esc(e.charAt(0).toUpperCase())+'</span>';b.title=e;}
-    else{b.innerHTML=PERSON;b.title=L('account');}
+    var b=document.getElementById('acct-btn');
+    if(b){
+      if(CURRENT){var e=CURRENT.email||'?';
+        b.innerHTML='<span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:10px;font-weight:700">'+esc(e.charAt(0).toUpperCase())+'</span><span>'+L('account')+'</span>';
+        b.title=e;
+      }else{b.innerHTML=PERSON+'<span>'+L('sign_in')+'</span>';b.title=L('sign_in');}
+    }
+    var mt=document.getElementById('acct-mob-tx');if(mt)mt.textContent=CURRENT?L('account'):L('sign_in');
   }
 
   /* ---- boot ---- */
   function start(){
     ensureBtn();
+    if(typeof window.setL==='function'){var _sl=window.setL;window.setL=function(l){_sl(l);try{updateBtn();}catch(e){}};}
     supa.auth.getSession().then(function(r){CURRENT=(r&&r.data&&r.data.session)?r.data.session.user:null;updateBtn();});
     supa.auth.onAuthStateChange(function(ev,session){
       CURRENT=session&&session.user?session.user:null;updateBtn();
