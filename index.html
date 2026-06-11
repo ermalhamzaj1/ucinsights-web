@@ -2283,5 +2283,181 @@ else document.addEventListener('DOMContentLoaded',boot);
 
 })();
 </script>
+
+<!-- ====================== AUTH + CLOUD SYNC (Supabase) ====================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="auth-overlay" onclick="if(event.target===this){window.uauth&&window.uauth.close()}" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px">
+  <div id="auth-card" style="background:var(--bg);color:var(--text);width:100%;max-width:380px;border-radius:16px;border:1px solid var(--border);padding:22px;box-shadow:0 14px 44px rgba(0,0,0,.28);max-height:90vh;overflow:auto"></div>
+</div>
+<script>
+(function(){
+  /* ===== CONFIG — paste your Supabase values (see SUPABASE_SETUP.md) ===== */
+  var SUPA_URL  = window.UC_SUPABASE_URL  || '__SUPABASE_URL__';
+  var SUPA_ANON = window.UC_SUPABASE_ANON || '__SUPABASE_ANON_KEY__';
+  /* Not configured yet -> stay fully local, show nothing. */
+  if(!/^https:\/\/.+\.supabase\.co/.test(SUPA_URL) || SUPA_ANON.indexOf('__')===0) return;
+  if(!window.supabase || !window.supabase.createClient) return;
+  var supa = window.supabase.createClient(SUPA_URL, SUPA_ANON, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+
+  var CURRENT=null, mode='signin', synced=false, syncing=false, lastPushed='';
+  var PERSON='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
+  var AX={
+    en:{account:'Account',intro:'Create an account to securely back up your profile, tracker and meds — and sync across your phone and the web.',
+      sign_in:'Sign in',register:'Register',email:'Email',password:'Password',or:'or',
+      send_link:'Email me a magic link',google:'Continue with Google',
+      need_both:'Enter your email and password.',need_email:'Enter your email first.',
+      working:'Working…',check_email:'Check your email to confirm.',
+      signed_as:'Signed in as',cloud_on:'Backup & sync are on',sign_out:'Sign out',
+      del_data:'Delete my cloud data',del_confirm:'Delete your backed-up data from the cloud? Your data on this device stays.',del_done:'Cloud data deleted.',
+      syncing:'Syncing…',synced:'Backup & sync are on',
+      privacy:'Your health data is encrypted in transit and protected per-user. We never share it, and you can delete it anytime.'},
+    tr:{account:'Hesap',intro:'Profilinizi, takip ve ilaç verilerinizi güvenle yedeklemek ve telefon ile web arasında eşitlemek için bir hesap oluşturun.',
+      sign_in:'Giriş yap',register:'Kayıt ol',email:'E-posta',password:'Şifre',or:'veya',
+      send_link:'Bana sihirli bağlantı gönder',google:'Google ile devam et',
+      need_both:'E-posta ve şifrenizi girin.',need_email:'Önce e-postanızı girin.',
+      working:'İşleniyor…',check_email:'Onaylamak için e-postanızı kontrol edin.',
+      signed_as:'Giriş yapıldı:',cloud_on:'Yedekleme ve eşitleme açık',sign_out:'Çıkış yap',
+      del_data:'Bulut verilerimi sil',del_confirm:'Buluttaki yedek verileriniz silinsin mi? Bu cihazdaki verileriniz kalır.',del_done:'Bulut verileri silindi.',
+      syncing:'Eşitleniyor…',synced:'Yedekleme ve eşitleme açık',
+      privacy:'Sağlık verileriniz aktarım sırasında şifrelenir ve kullanıcıya özel korunur. Asla paylaşmayız, istediğiniz zaman silebilirsiniz.'}
+  };
+  function L(k){var o=AX[window.LANG||'en']||AX.en;return o[k]||AX.en[k]||k;}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  /* ---- local snapshot <-> app state ---- */
+  function getLS(k,f){try{var r=localStorage.getItem(k);return r?JSON.parse(r):f;}catch(e){return f;}}
+  function snapshot(){return {profile:getLS('uc-profile-v1',{}),tracker:getLS('uc-tracker-v1',{}),meds:getLS('uc-meds-v1',[])};}
+  function writeLocal(m){try{localStorage.setItem('uc-profile-v1',JSON.stringify(m.profile||{}));localStorage.setItem('uc-tracker-v1',JSON.stringify(m.tracker||{}));localStorage.setItem('uc-meds-v1',JSON.stringify(m.meds||[]));}catch(e){}}
+  function applyToApp(m){
+    try{if(m.profile){window.UC_PROFILE=m.profile;if(!Array.isArray(window.UC_PROFILE.currentMeds))window.UC_PROFILE.currentMeds=[];}}catch(e){}
+    try{if(window.TRK)window.TRK.entries=m.tracker||{};}catch(e){}
+    try{window.UC_MEDS=Array.isArray(m.meds)?m.meds:[];}catch(e){}
+    var av=document.querySelector('.view.active'),vid=av?av.id.replace('view-',''):'';
+    try{
+      if(vid==='profile'&&window.renderProfile)window.renderProfile();
+      else if(vid==='mymeds'&&window.renderMyMeds)window.renderMyMeds();
+      else if(vid==='tracker'&&window.initTracker)window.initTracker();
+      else if(vid==='analytics'&&window.initAnalytics)window.initAnalytics();
+      else if(vid==='patterns'&&window.renderPat)window.renderPat();
+    }catch(e){}
+  }
+
+  /* ---- cloud sync (last-write-wins; tracker days unioned) ---- */
+  function push(s){
+    if(!CURRENT)return Promise.resolve();
+    s=s||snapshot();
+    return supa.from('user_state').upsert({user_id:CURRENT.id,profile:s.profile,tracker:s.tracker,meds:s.meds,updated_at:new Date().toISOString()},{onConflict:'user_id'})
+      .then(function(r){if(r.error)console.warn('UC push:',r.error.message);else lastPushed=JSON.stringify(s);});
+  }
+  function setStatus(t){var e=document.getElementById('auth-status');if(e)e.textContent=t;}
+  function syncDown(){
+    if(!CURRENT||syncing)return; syncing=true; setStatus(L('syncing'));
+    supa.from('user_state').select('profile,tracker,meds').eq('user_id',CURRENT.id).maybeSingle().then(function(res){
+      if(res&&res.error)console.warn('UC sync:',res.error.message);
+      var local=snapshot(),data=res&&res.data,merged;
+      if(!data){merged=local;}
+      else{merged={
+        tracker:Object.assign({},local.tracker,data.tracker||{}),
+        profile:(data.profile&&Object.keys(data.profile).length)?data.profile:local.profile,
+        meds:(Array.isArray(data.meds)&&data.meds.length)?data.meds:local.meds
+      };}
+      writeLocal(merged); applyToApp(merged);
+      return push(merged);
+    }).catch(function(e){console.warn('UC sync:',e);}).then(function(){syncing=false;setStatus(L('synced'));});
+  }
+
+  /* ---- auth actions (exposed for inline onclick) ---- */
+  function showMsg(t,err){var m=document.getElementById('auth-msg');if(m){m.textContent=t;m.style.color=err?'#c0392b':'var(--text2)';}}
+  window.uauth={
+    open:function(){render();document.getElementById('auth-overlay').style.display='flex';},
+    close:function(){document.getElementById('auth-overlay').style.display='none';},
+    setMode:function(m){mode=m;render();},
+    submit:function(){
+      var em=((document.getElementById('auth-email')||{}).value||'').trim();
+      var pw=(document.getElementById('auth-pw')||{}).value||'';
+      if(!em||!pw){showMsg(L('need_both'),true);return;}
+      showMsg(L('working'));
+      var p=mode==='signin'
+        ?supa.auth.signInWithPassword({email:em,password:pw})
+        :supa.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.href}});
+      p.then(function(r){
+        if(r.error){showMsg(r.error.message,true);}
+        else if(mode==='register'&&!(r.data&&r.data.session)){showMsg(L('check_email'));}
+        else{window.uauth.close();}
+      });
+    },
+    magic:function(){
+      var em=((document.getElementById('auth-email')||{}).value||'').trim();
+      if(!em){showMsg(L('need_email'),true);return;}
+      showMsg(L('working'));
+      supa.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.href}}).then(function(r){showMsg(r.error?r.error.message:L('check_email'),!!r.error);});
+    },
+    google:function(){supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href}});},
+    signout:function(){supa.auth.signOut().then(function(){window.uauth.close();});},
+    deldata:function(){
+      if(!CURRENT||!confirm(L('del_confirm')))return;
+      supa.from('user_state').delete().eq('user_id',CURRENT.id).then(function(){setStatus(L('del_done'));lastPushed='';});
+    }
+  };
+
+  /* ---- modal rendering ---- */
+  function tab(id,label){var on=mode===id;return '<button type="button" onclick="uauth.setMode(\''+id+'\')" style="flex:1;padding:9px;border-radius:10px;border:1px solid '+(on?'var(--accent)':'var(--border)')+';background:'+(on?'var(--accent)':'transparent')+';color:'+(on?'#fff':'var(--text2)')+';font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">'+esc(label)+'</button>';}
+  function inp(id,type,ph){return '<input id="'+id+'" type="'+type+'" placeholder="'+esc(ph)+'" autocomplete="'+(type==='password'?'current-password':'email')+'" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;margin-bottom:10px;box-sizing:border-box">';}
+  function hdr(title){return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-size:18px;font-weight:600">'+esc(title)+'</div><button type="button" onclick="uauth.close()" aria-label="Close" style="background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--text3)">&times;</button></div>';}
+  function render(){
+    var c=document.getElementById('auth-card');if(!c)return;var h='';
+    if(CURRENT){
+      h+=hdr(L('account'));
+      h+='<div style="font-size:12px;color:var(--text3);margin-bottom:4px">'+L('signed_as')+'</div>';
+      h+='<div style="font-size:16px;font-weight:600;margin-bottom:14px;word-break:break-all">'+esc(CURRENT.email||'')+'</div>';
+      h+='<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:16px"><span style="width:8px;height:8px;border-radius:50%;background:#27ae60;flex:none"></span><span id="auth-status" style="font-size:12px;color:var(--text2)">'+L('cloud_on')+'</span></div>';
+      h+='<button class="pf-save" onclick="uauth.signout()">'+L('sign_out')+'</button>';
+      h+='<button class="btn-ghost" onclick="uauth.deldata()" style="width:100%;margin-top:10px;color:#c0392b">'+L('del_data')+'</button>';
+    }else{
+      h+=hdr(L('account'));
+      h+='<div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5">'+L('intro')+'</div>';
+      h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+tab('signin',L('sign_in'))+tab('register',L('register'))+'</div>';
+      h+=inp('auth-email','email',L('email'))+inp('auth-pw','password',L('password'));
+      h+='<button class="pf-save" onclick="uauth.submit()">'+(mode==='signin'?L('sign_in'):L('register'))+'</button>';
+      h+='<div id="auth-msg" style="font-size:12px;margin-top:10px;min-height:15px;color:var(--text2)"></div>';
+      h+='<div style="text-align:center;margin:8px 0 12px;color:var(--text3);font-size:11px">'+L('or')+'</div>';
+      h+='<button class="btn-ghost" style="width:100%;margin-bottom:8px" onclick="uauth.magic()">'+L('send_link')+'</button>';
+      h+='<button class="btn-ghost" style="width:100%" onclick="uauth.google()">'+L('google')+'</button>';
+      h+='<div style="font-size:11px;color:var(--text3);margin-top:14px;line-height:1.5">'+L('privacy')+'</div>';
+    }
+    c.innerHTML=h;
+  }
+
+  /* ---- nav button ---- */
+  function ensureBtn(){
+    var nr=document.querySelector('.nav-right');if(!nr||document.getElementById('acct-btn'))return;
+    var b=document.createElement('button');b.id='acct-btn';b.className='theme-btn';b.type='button';
+    b.title=L('account');b.setAttribute('aria-label',L('account'));b.innerHTML=PERSON;
+    b.onclick=function(){window.uauth.open();};
+    nr.insertBefore(b,document.getElementById('theme-btn')||nr.firstChild);updateBtn();
+  }
+  function updateBtn(){
+    var b=document.getElementById('acct-btn');if(!b)return;
+    if(CURRENT){var e=CURRENT.email||'?';b.innerHTML='<span style="display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:11px;font-weight:600">'+esc(e.charAt(0).toUpperCase())+'</span>';b.title=e;}
+    else{b.innerHTML=PERSON;b.title=L('account');}
+  }
+
+  /* ---- boot ---- */
+  function start(){
+    ensureBtn();
+    supa.auth.getSession().then(function(r){CURRENT=(r&&r.data&&r.data.session)?r.data.session.user:null;updateBtn();});
+    supa.auth.onAuthStateChange(function(ev,session){
+      CURRENT=session&&session.user?session.user:null;updateBtn();
+      if(document.getElementById('auth-overlay').style.display==='flex')render();
+      if(CURRENT&&!synced){synced=true;syncDown();}
+      if(ev==='SIGNED_OUT'){synced=false;}
+    });
+    setInterval(function(){if(!CURRENT)return;var cur=JSON.stringify(snapshot());if(cur!==lastPushed)push();},15000);
+    document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'&&CURRENT){var cur=JSON.stringify(snapshot());if(cur!==lastPushed)push();}});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
 </body>
 </html>
