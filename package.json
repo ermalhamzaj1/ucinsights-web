@@ -1,0 +1,9 @@
+{
+  "name": "ucinsights",
+  "version": "1.0.0",
+  "description": "UCInsights — AI-powered Ulcerative Colitis patient intelligence platform",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

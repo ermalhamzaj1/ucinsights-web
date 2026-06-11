@@ -1,0 +1,32 @@
+{
+  "name": "UCInsights — UC Patient Assistant",
+  "short_name": "UCInsights",
+  "description": "AI-powered personal assistant for ulcerative colitis: symptom explorer, food & medication insights, daily tracker, analytics, research news and reminders.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f9ff",
+  "theme_color": "#2563eb",
+  "lang": "en",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "ucinsight.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ucinsight.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
