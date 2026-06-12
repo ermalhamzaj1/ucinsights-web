@@ -40,7 +40,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 .nav{background:var(--card);border-bottom:1px solid var(--border);height:58px;display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .nav-logo{height:40px;cursor:pointer;display:flex;align-items:center;flex-shrink:0}
 .nav-logo img{height:40px;width:auto;object-fit:contain}
-.nav-links{display:flex;gap:2px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links{display:flex;gap:2px;flex:1;justify-content:center}
 .nlink{padding:6px 11px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;border:none;background:none;font-family:inherit;white-space:nowrap}
 .nlink:hover{background:var(--bg);color:var(--text)}
 .nlink.active{background:var(--accent);color:#fff}
@@ -401,6 +401,25 @@ html[data-theme="dark"] .theme-btn .ico-sun{display:block}
 .btn-ghost{padding:11px 16px;background:none;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;font-size:14px;color:var(--text2)}
 .notif-banner{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
 .notif-banner button{margin-left:auto;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;flex-shrink:0}
+.nav-sep{width:1px;height:18px;background:var(--border);margin:0 2px;flex-shrink:0;align-self:center}
+.mob-sep{padding:14px 16px 4px;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;pointer-events:none;border-top:1px solid var(--border);margin-top:6px}
+/* ---- Profile Hub ---- */
+.pf-hub-hero{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px}
+.pf-hub-avatar{width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0}
+.pf-hub-info{flex:1;min-width:0}
+.pf-hub-email{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-hub-badge{font-size:11px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:5px}
+.pf-hub-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.pf-hub-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.pf-hub-tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:20px 12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:border-color .15s,transform .12s;text-align:center;user-select:none}
+.pf-hub-tile:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pf-hub-tile:active{transform:translateY(0)}
+.pf-hub-tile-icon{font-size:30px;line-height:1}
+.pf-hub-tile-label{font-size:13px;font-weight:600;color:var(--text)}
+.pf-hub-tile-sub{font-size:11px;color:var(--text3);line-height:1.4}
+.pf-hub-divider{display:flex;align-items:center;gap:10px;margin:4px 0 16px;color:var(--text3);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.pf-hub-divider::before,.pf-hub-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.pf-hub-signin{background:var(--card);border:1px dashed var(--border);border-radius:var(--r);padding:24px 20px;text-align:center;margin-bottom:18px}
 </style>
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1326858927521321"
@@ -413,15 +432,19 @@ html[data-theme="dark"] .theme-btn .ico-sun{display:block}
     <img id="nav-logo-img" src="" alt="UCInsights">
   </div>
   <div class="nav-links">
+    <!-- public -->
     <button class="nlink active" id="nl-home" onclick="navTo('home',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> <span id="ntx-home">Home</span></button>
     <button class="nlink" id="nl-symptoms" onclick="navTo('symptoms',this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span id="ntx-symptoms">Symptoms</span></button>
-    <button class="nlink" id="nl-chat" onclick="navTo('chat',this);initChat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span id="ntx-chat">Chat</span></button>
     <button class="nlink" id="nl-foods" onclick="navTo('foods',this);initFoods()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> <span id="ntx-foods">Foods</span></button>
     <button class="nlink" id="nl-meds" onclick="navTo('meds',this);renderMeds()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M3 17h3m0 0v3m0-3V14m-3 3h3"/></svg> <span id="ntx-meds">Medications</span></button>
     <button class="nlink" id="nl-patterns" onclick="navTo('patterns',this);renderPat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span id="ntx-patterns">Patterns</span></button>
+    <button class="nlink" id="nl-news" onclick="navTo('news',this);renderNewsPage()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span id="ntx-news">News</span></button>
+    <!-- separator: only visible when signed in -->
+    <span class="nav-sep" id="nav-sep" style="display:none"></span>
+    <!-- personal (gated) -->
+    <button class="nlink" id="nl-chat" onclick="navTo('chat',this);initChat()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span id="ntx-chat">Chat</span></button>
     <button class="nlink" id="nl-tracker" onclick="navTo('tracker',this);initTracker()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg> <span id="ntx-tracker">Tracker</span></button>
     <button class="nlink" id="nl-analytics" onclick="navTo('analytics',this);initAnalytics()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 8v4l3 3"/></svg> <span id="ntx-analytics">Analytics</span></button>
-    <button class="nlink" id="nl-news" onclick="navTo('news',this);renderNewsPage()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span id="ntx-news">News</span></button>
     <button class="nlink" id="nl-mymeds" onclick="navTo('mymeds',this);renderMyMeds()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/></svg> <span id="ntx-mymeds">My Meds</span></button>
     <button class="nlink" id="nl-profile" onclick="navTo('profile',this);renderProfile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="ntx-profile">Profile</span></button>
   </div>
@@ -436,15 +459,18 @@ html[data-theme="dark"] .theme-btn .ico-sun{display:block}
   </div>
 </nav>
 <div class="mob-menu" id="mob-menu">
+  <!-- public -->
   <button class="mob-link active" id="ml-home" onclick="navTo('home',null);closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> <span id="mtx-home">Home</span></button>
   <button class="mob-link" id="ml-symptoms" onclick="navTo('symptoms',null);closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> <span id="mtx-symptoms">Symptoms</span></button>
-  <button class="mob-link" id="ml-chat" onclick="navTo('chat',null);initChat();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span id="mtx-chat">Chat</span></button>
   <button class="mob-link" id="ml-foods" onclick="navTo('foods',null);initFoods();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> <span id="mtx-foods">Foods</span></button>
   <button class="mob-link" id="ml-meds" onclick="navTo('meds',null);renderMeds();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M3 17h3m0 0v3m0-3V14m-3 3h3"/></svg> <span id="mtx-meds">Medications</span></button>
   <button class="mob-link" id="ml-patterns" onclick="navTo('patterns',null);renderPat();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span id="mtx-patterns">Patterns</span></button>
+  <button class="mob-link" id="ml-news" onclick="navTo('news',null);renderNewsPage();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span id="mtx-news">News</span></button>
+  <!-- section label + personal items: only visible when signed in -->
+  <div class="mob-sep" id="mob-sep" style="display:none">My Account</div>
+  <button class="mob-link" id="ml-chat" onclick="navTo('chat',null);initChat();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span id="mtx-chat">Chat</span></button>
   <button class="mob-link" id="ml-tracker" onclick="navTo('tracker',null);initTracker();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg> <span id="mtx-tracker">Tracker</span></button>
   <button class="mob-link" id="ml-analytics" onclick="navTo('analytics',null);initAnalytics();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 8v4l3 3"/></svg> <span id="mtx-analytics">Analytics</span></button>
-  <button class="mob-link" id="ml-news" onclick="navTo('news',null);renderNewsPage();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span id="mtx-news">News</span></button>
   <button class="mob-link" id="ml-mymeds" onclick="navTo('mymeds',null);renderMyMeds();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7z"/><path d="m8.5 8.5 7 7"/></svg> <span id="mtx-mymeds">My Meds</span></button>
   <button class="mob-link" id="ml-profile" onclick="navTo('profile',null);renderProfile();closeMob()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="mtx-profile">Profile</span></button>
 </div>
@@ -587,8 +613,7 @@ html[data-theme="dark"] .theme-btn .ico-sun{display:block}
 <!-- PROFILE -->
 <div class="view" id="view-profile">
   <div class="inner-wrap" style="max-width:640px">
-    <h1 class="page-title" id="profile-title">My UC Profile</h1>
-    <p class="page-sub" id="profile-sub">Helps tailor your activity score, insights and AI answers. Stays on your device.</p>
+    <div id="profile-hub"></div>
     <div id="profile-body"></div>
   </div>
 </div>
@@ -1998,7 +2023,13 @@ var TX={
     med_take:'Time for your medication',trk_remind_title:'UCInsights tracker',
     trk_remind_morning:'Good morning! Log how you slept and feel today.',
     trk_remind_mid:'Afternoon check-in — update your tracker.',
-    trk_remind_eve:'Evening log — record today’s symptoms & meals.'
+    trk_remind_eve:'Evening log — record today\'s symptoms & meals.',
+    hub_greeting:'My Profile',hub_sync_on:'Cloud sync on',hub_signed_as:'Account',
+    hub_sign_in_cta:'Sign in to back up your data and sync across all your devices.',hub_sign_in:'Sign In',
+    hub_tile_tracker:'Tracker',hub_tile_tracker_sub:'Log daily symptoms',
+    hub_tile_analytics:'Analytics',hub_tile_analytics_sub:'View your trends',
+    hub_tile_mymeds:'My Meds',hub_tile_mymeds_sub:'Manage reminders',
+    hub_tile_ucprofile:'My UC Profile',hub_tile_ucprofile_sub:'Personalize your data'
   },
   tr:{
     nav_news:'Haberler',nav_mymeds:'İlaçlarım',nav_profile:'Profil',
@@ -2022,6 +2053,12 @@ var TX={
     med_take:'İlaç zamanınız',trk_remind_title:'UCInsights takip',
     trk_remind_morning:'Günaydın! Bugün nasıl uyuduğunuzu ve hissettiğinizi kaydedin.',
     trk_remind_mid:'Öğleden sonra kontrolü — takibinizi güncelleyin.',
+    hub_greeting:'Profilim',hub_sync_on:'Bulut eşitleme açık',hub_signed_as:'Hesap',
+    hub_sign_in_cta:'Verilerinizi yedeklemek ve tüm cihazlarınızda eşitlemek için giriş yapın.',hub_sign_in:'Giriş Yap',
+    hub_tile_tracker:'Takip',hub_tile_tracker_sub:'Günlük semptom kaydı',
+    hub_tile_analytics:'Analitik',hub_tile_analytics_sub:'Trendleri görüntüle',
+    hub_tile_mymeds:'İlaçlarım',hub_tile_mymeds_sub:'Hatırlatıcıları yönet',
+    hub_tile_ucprofile:'UC Profilim',hub_tile_ucprofile_sub:'Verileri kişiselleştir',
     trk_remind_eve:'Akşam kaydı — bugünkü semptom ve öğünleri kaydedin.'
   }
 };
@@ -2066,7 +2103,34 @@ function saveProfile(){try{localStorage.setItem(PKEY,JSON.stringify(window.UC_PR
 window.UC_PROFILE=loadProfile();
 
 window.renderProfile=function(){
-  var p=window.UC_PROFILE,body=document.getElementById('profile-body');if(!body)return;
+  /* --- hub: hero + tiles --- */
+  var hub=document.getElementById('profile-hub');
+  if(hub){
+    var u=window.UC_AUTH_USER,hh='';
+    if(u){
+      var init=esc((u.email||'?').charAt(0).toUpperCase());
+      hh+='<div class="pf-hub-hero">'
+        +'<div class="pf-hub-avatar">'+init+'</div>'
+        +'<div class="pf-hub-info">'
+        +'<div class="pf-hub-email">'+esc(u.email||'')+'</div>'
+        +'<div class="pf-hub-badge"><span class="pf-hub-dot"></span>'+tx('hub_sync_on')+'</div>'
+        +'</div>'
+        +'<button class="btn-ghost" style="padding:7px 13px;font-size:12px;flex-shrink:0" onclick="window.uauth&&window.uauth.open()">'+tx('hub_signed_as')+'</button>'
+        +'</div>';
+    }else{
+      hh+='<div class="pf-hub-signin">'
+        +'<div style="font-size:48px;margin-bottom:12px">🔒</div>'
+        +'<div style="font-size:16px;font-weight:700;margin-bottom:8px">'+tx('hub_greeting')+'</div>'
+        +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">'+tx('hub_sign_in_cta')+'</div>'
+        +'<button class="pf-save" style="max-width:220px;margin:0 auto;display:block" onclick="window.uauth&&window.uauth.open()">'+tx('hub_sign_in')+'</button>'
+        +'</div>';
+    }
+    hub.innerHTML=hh;
+  }
+  /* --- profile form: only shown when signed in --- */
+  var body=document.getElementById('profile-body');if(!body)return;
+  if(!window.UC_AUTH_USER){body.innerHTML='';return;}
+  var p=window.UC_PROFILE;
   var yr=new Date().getFullYear();
   var types=['proctitis','leftSided','extensive','unsure'];
   var h='';
@@ -2447,6 +2511,7 @@ else document.addEventListener('DOMContentLoaded',boot);
     }
     updateBtn();
   }
+  var GATED=['tracker','analytics','mymeds','chat','profile'];
   function updateBtn(){
     var b=document.getElementById('acct-btn');
     if(b){
@@ -2456,16 +2521,32 @@ else document.addEventListener('DOMContentLoaded',boot);
       }else{b.innerHTML=PERSON+'<span>'+L('sign_in')+'</span>';b.title=L('sign_in');}
     }
     var mt=document.getElementById('acct-mob-tx');if(mt)mt.textContent=CURRENT?L('account'):L('sign_in');
+    // show/hide gated nav items + separators
+    GATED.forEach(function(pg){
+      var d=document.getElementById('nl-'+pg);if(d)d.style.display=CURRENT?'':'none';
+      var m=document.getElementById('ml-'+pg);if(m)m.style.display=CURRENT?'':'none';
+    });
+    var sep=document.getElementById('nav-sep');if(sep)sep.style.display=CURRENT?'':'none';
+    var mobSep=document.getElementById('mob-sep');if(mobSep)mobSep.style.display=CURRENT?'':'none';
+    // if currently on a gated page and signed out, redirect to profile
+    if(!CURRENT){
+      var av=document.querySelector('.view.active');
+      if(av&&GATED.indexOf(av.id.replace('view-',''))>-1){
+        if(window.navTo)window.navTo('profile',null);
+        if(window.renderProfile)window.renderProfile();
+      }
+    }
   }
 
   /* ---- boot ---- */
   function start(){
     ensureBtn();
     if(typeof window.setL==='function'){var _sl=window.setL;window.setL=function(l){_sl(l);try{updateBtn();}catch(e){}};}
-    supa.auth.getSession().then(function(r){CURRENT=(r&&r.data&&r.data.session)?r.data.session.user:null;updateBtn();});
+    supa.auth.getSession().then(function(r){CURRENT=(r&&r.data&&r.data.session)?r.data.session.user:null;window.UC_AUTH_USER=CURRENT;updateBtn();});
     supa.auth.onAuthStateChange(function(ev,session){
-      CURRENT=session&&session.user?session.user:null;updateBtn();
+      CURRENT=session&&session.user?session.user:null;window.UC_AUTH_USER=CURRENT;updateBtn();
       if(document.getElementById('auth-overlay').style.display==='flex')render();
+      var av=document.querySelector('.view.active');if(av&&av.id==='view-profile'&&window.renderProfile)window.renderProfile();
       if(CURRENT&&!synced){synced=true;syncDown();}
       if(ev==='SIGNED_OUT'){synced=false;}
     });
